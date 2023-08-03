@@ -1,21 +1,66 @@
 {
   "pins" : [
     {
-      "identity" : "bluesocket",
+      "identity" : "redistack",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Kitura/BlueSocket.git",
+      "location" : "https://github.com/swift-server/RediStack.git",
       "state" : {
-        "revision" : "c9894fd117457f1d006575fbfb2fdfd6f79eac03",
-        "version" : "1.0.200"
+        "revision" : "43ea6af8623cb4b93c41719a3cbf9af6439d8b10",
+        "version" : "1.5.0"
       }
     },
     {
-      "identity" : "kitura-redis",
+      "identity" : "swift-atomics",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/yspreen/Kitura-redis",
+      "location" : "https://github.com/apple/swift-atomics.git",
       "state" : {
-        "revision" : "25ac4eb75ef66fb3f8e1a5f5c500263a3e1d5bf7",
-        "version" : "2.2.0"
+        "revision" : "6c89474e62719ddcc1e9614989fff2f68208fe10",
+        "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections.git",
+      "state" : {
+        "revision" : "937e904258d22af6e447a0b72c0bc67583ef64a2",
+        "version" : "1.0.4"
+      }
+    },
+    {
+      "identity" : "swift-log",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-log.git",
+      "state" : {
+        "revision" : "32e8d724467f8fe623624570367e3d50c5638e46",
+        "version" : "1.5.2"
+      }
+    },
+    {
+      "identity" : "swift-metrics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-metrics.git",
+      "state" : {
+        "revision" : "971ba26378ab69c43737ee7ba967a896cb74c0d1",
+        "version" : "2.4.1"
+      }
+    },
+    {
+      "identity" : "swift-nio",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-nio.git",
+      "state" : {
+        "revision" : "a2e487b77f17edbce9a65f2b7415f2f479dc8e48",
+        "version" : "2.57.0"
+      }
+    },
+    {
+      "identity" : "swift-nio-ssl",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-nio-ssl.git",
+      "state" : {
+        "revision" : "e866a626e105042a6a72a870c88b4c531ba05f83",
+        "version" : "2.24.0"
       }
     }
   ],
