@@ -13,7 +13,8 @@
 		CE0FF24C2A7BFDE2009ACA3C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CE0FF24B2A7BFDE2009ACA3C /* Preview Assets.xcassets */; };
 		CE78C6D92A7BFE340078B6BB /* DoorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE78C6D82A7BFE340078B6BB /* DoorView.swift */; };
 		CE78C6DE2A7C47190078B6BB /* Redis.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE78C6DD2A7C47190078B6BB /* Redis.swift */; };
-		CE78C6E42A7C4C6C0078B6BB /* SwiftRedis in Frameworks */ = {isa = PBXBuildFile; productRef = CE78C6E32A7C4C6C0078B6BB /* SwiftRedis */; };
+		CE78C6E72A7C50330078B6BB /* RediStack in Frameworks */ = {isa = PBXBuildFile; productRef = CE78C6E62A7C50330078B6BB /* RediStack */; };
+		CE78C6EC2A7C5FCB0078B6BB /* Date+iso.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE78C6EB2A7C5FCB0078B6BB /* Date+iso.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		CE0FF24B2A7BFDE2009ACA3C /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		CE78C6D82A7BFE340078B6BB /* DoorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoorView.swift; sourceTree = "<group>"; };
 		CE78C6DD2A7C47190078B6BB /* Redis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Redis.swift; sourceTree = "<group>"; };
+		CE78C6EB2A7C5FCB0078B6BB /* Date+iso.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+iso.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,7 +33,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CE78C6E42A7C4C6C0078B6BB /* SwiftRedis in Frameworks */,
+				CE78C6E72A7C50330078B6BB /* RediStack in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,6 +65,7 @@
 				CE0FF24A2A7BFDE2009ACA3C /* Preview Content */,
 				CE78C6D82A7BFE340078B6BB /* DoorView.swift */,
 				CE78C6DD2A7C47190078B6BB /* Redis.swift */,
+				CE78C6EB2A7C5FCB0078B6BB /* Date+iso.swift */,
 			);
 			path = door;
 			sourceTree = "<group>";
@@ -92,7 +95,7 @@
 			);
 			name = door;
 			packageProductDependencies = (
-				CE78C6E32A7C4C6C0078B6BB /* SwiftRedis */,
+				CE78C6E62A7C50330078B6BB /* RediStack */,
 			);
 			productName = door;
 			productReference = CE0FF2412A7BFDE1009ACA3C /* door.app */;
@@ -123,7 +126,7 @@
 			);
 			mainGroup = CE0FF2382A7BFDE1009ACA3C;
 			packageReferences = (
-				CE78C6E22A7C4C6C0078B6BB /* XCRemoteSwiftPackageReference "Kitura-redis" */,
+				CE78C6E52A7C50330078B6BB /* XCRemoteSwiftPackageReference "RediStack" */,
 			);
 			productRefGroup = CE0FF2422A7BFDE1009ACA3C /* Products */;
 			projectDirPath = "";
@@ -154,6 +157,7 @@
 				CE78C6D92A7BFE340078B6BB /* DoorView.swift in Sources */,
 				CE78C6DE2A7C47190078B6BB /* Redis.swift in Sources */,
 				CE0FF2472A7BFDE1009ACA3C /* ContentView.swift in Sources */,
+				CE78C6EC2A7C5FCB0078B6BB /* Date+iso.swift in Sources */,
 				CE0FF2452A7BFDE1009ACA3C /* doorApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -365,21 +369,21 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		CE78C6E22A7C4C6C0078B6BB /* XCRemoteSwiftPackageReference "Kitura-redis" */ = {
+		CE78C6E52A7C50330078B6BB /* XCRemoteSwiftPackageReference "RediStack" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/yspreen/Kitura-redis";
+			repositoryURL = "https://github.com/swift-server/RediStack.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.0;
+				minimumVersion = 1.5.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		CE78C6E32A7C4C6C0078B6BB /* SwiftRedis */ = {
+		CE78C6E62A7C50330078B6BB /* RediStack */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = CE78C6E22A7C4C6C0078B6BB /* XCRemoteSwiftPackageReference "Kitura-redis" */;
-			productName = SwiftRedis;
+			package = CE78C6E52A7C50330078B6BB /* XCRemoteSwiftPackageReference "RediStack" */;
+			productName = RediStack;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -114,6 +114,11 @@ struct DoorView: View {
 		.task {
 			await RedisClient.sync()
 		}
+		.onTapGesture {
+			Task {
+				await RedisClient.setLocked(to: !locked)
+			}
+		}
 	}
 
 	@ViewBuilder
