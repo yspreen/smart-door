@@ -12,6 +12,8 @@
 		CE0FF2492A7BFDE2009ACA3C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CE0FF2482A7BFDE2009ACA3C /* Assets.xcassets */; };
 		CE0FF24C2A7BFDE2009ACA3C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CE0FF24B2A7BFDE2009ACA3C /* Preview Assets.xcassets */; };
 		CE78C6D92A7BFE340078B6BB /* DoorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE78C6D82A7BFE340078B6BB /* DoorView.swift */; };
+		CE78C6DE2A7C47190078B6BB /* Redis.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE78C6DD2A7C47190078B6BB /* Redis.swift */; };
+		CE78C6E42A7C4C6C0078B6BB /* SwiftRedis in Frameworks */ = {isa = PBXBuildFile; productRef = CE78C6E32A7C4C6C0078B6BB /* SwiftRedis */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +23,7 @@
 		CE0FF2482A7BFDE2009ACA3C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CE0FF24B2A7BFDE2009ACA3C /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		CE78C6D82A7BFE340078B6BB /* DoorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoorView.swift; sourceTree = "<group>"; };
+		CE78C6DD2A7C47190078B6BB /* Redis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Redis.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -28,6 +31,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE78C6E42A7C4C6C0078B6BB /* SwiftRedis in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -58,6 +62,7 @@
 				CE0FF2482A7BFDE2009ACA3C /* Assets.xcassets */,
 				CE0FF24A2A7BFDE2009ACA3C /* Preview Content */,
 				CE78C6D82A7BFE340078B6BB /* DoorView.swift */,
+				CE78C6DD2A7C47190078B6BB /* Redis.swift */,
 			);
 			path = door;
 			sourceTree = "<group>";
@@ -86,6 +91,9 @@
 			dependencies = (
 			);
 			name = door;
+			packageProductDependencies = (
+				CE78C6E32A7C4C6C0078B6BB /* SwiftRedis */,
+			);
 			productName = door;
 			productReference = CE0FF2412A7BFDE1009ACA3C /* door.app */;
 			productType = "com.apple.product-type.application";
@@ -114,6 +122,9 @@
 				Base,
 			);
 			mainGroup = CE0FF2382A7BFDE1009ACA3C;
+			packageReferences = (
+				CE78C6E22A7C4C6C0078B6BB /* XCRemoteSwiftPackageReference "Kitura-redis" */,
+			);
 			productRefGroup = CE0FF2422A7BFDE1009ACA3C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -141,6 +152,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE78C6D92A7BFE340078B6BB /* DoorView.swift in Sources */,
+				CE78C6DE2A7C47190078B6BB /* Redis.swift in Sources */,
 				CE0FF2472A7BFDE1009ACA3C /* ContentView.swift in Sources */,
 				CE0FF2452A7BFDE1009ACA3C /* doorApp.swift in Sources */,
 			);
@@ -351,6 +363,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CE78C6E22A7C4C6C0078B6BB /* XCRemoteSwiftPackageReference "Kitura-redis" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/yspreen/Kitura-redis";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CE78C6E32A7C4C6C0078B6BB /* SwiftRedis */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CE78C6E22A7C4C6C0078B6BB /* XCRemoteSwiftPackageReference "Kitura-redis" */;
+			productName = SwiftRedis;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CE0FF2392A7BFDE1009ACA3C /* Project object */;
 }

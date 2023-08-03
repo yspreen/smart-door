@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "bluesocket",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Kitura/BlueSocket.git",
+      "state" : {
+        "revision" : "c9894fd117457f1d006575fbfb2fdfd6f79eac03",
+        "version" : "1.0.200"
+      }
+    },
+    {
+      "identity" : "kitura-redis",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/yspreen/Kitura-redis",
+      "state" : {
+        "revision" : "25ac4eb75ef66fb3f8e1a5f5c500263a3e1d5bf7",
+        "version" : "2.2.0"
+      }
+    }
+  ],
+  "version" : 2
+}

@@ -35,8 +35,14 @@ struct RevTriangle: Shape {
 }
 
 struct DoorView: View {
-	@State var opened = false
-	@State var locked = false
+	@EnvironmentObject var redisStore: RedisStore
+
+	var opened: Bool {
+		redisStore.doorState.open
+	}
+	var locked: Bool {
+		redisStore.doorState.locked
+	}
 
 	var body: some View {
 		VStack(spacing: 0) {
@@ -103,10 +109,10 @@ struct DoorView: View {
 				.opacity(0.03)
 				.blendMode(.multiply)
 		}
-		.onTapGesture {
-			withAnimation {
-				opened.toggle()
-			}
+		.animation(.default, value: locked)
+		.animation(.default, value: opened)
+		.task {
+			RedisClient.sync()
 		}
 	}
 
@@ -139,11 +145,6 @@ struct DoorView: View {
 				Circle().stroke(Color(white: 0.7), lineWidth: 0.5)
 			}
 			.rotationEffect(.degrees(locked ? 0 : -45))
-		}
-		.onTapGesture {
-			withAnimation {
-				locked.toggle()
-			}
 		}
 	}
 
