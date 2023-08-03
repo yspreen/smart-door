@@ -13,6 +13,7 @@ struct doorApp: App {
         WindowGroup {
             ContentView()
 				.preferredColorScheme(.light)
+				.environmentObject(RedisStore.instance)
         }
     }
 }
