@@ -112,7 +112,7 @@ struct DoorView: View {
 		.animation(.default, value: locked)
 		.animation(.default, value: opened)
 		.task {
-			RedisClient.sync()
+			await RedisClient.sync()
 		}
 	}
 

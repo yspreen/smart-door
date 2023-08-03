@@ -15,7 +15,7 @@ class RedisStore: ObservableObject {
 	@Published var doorState = DoorState()
 }
 
-struct DoorState {
+struct DoorState: Codable {
 	var open = false
 	var locked = true
 }
@@ -27,7 +27,15 @@ enum RedisClient {
 	static let password = "nevercommit"
 	static let redis = Redis()
 
-	static func connect() {
+	static func connect() async {
+		await withCheckedContinuation { cont in
+			connectCallback {
+				cont.resume()
+			}
+		}
+	}
+
+	static func connectCallback(callback: () -> Void) {
 		redis.connect(host: host, port: .init(port)) {
 			if let err = $0 {
 				return print(err)
@@ -36,13 +44,46 @@ enum RedisClient {
 				if let err = $0 {
 					return print(err)
 				}
-				print("ok")
+				callback()
 			}
 		}
 	}
 
-	static func sync() {
-		connect()
+	static func get(_ key: String) async -> String? {
+		await withCheckedContinuation { cont in
+			redis.get(key) { res, err in
+				if let err {
+					print(err)
+					return cont.resume(returning: nil)
+				}
+				return cont.resume(returning: res?.asString)
+			}
+		}
+	}
+
+	static func poll() async {
+		if
+			let string = await get("door_\(doorId)"),
+			let data = string.data(using: .utf8),
+			let door = try? JSONDecoder().decode(DoorState.self, from: data)
+		{
+			await MainActor.run {
+				RedisStore.instance.doorState = door
+			}
+		}
+		startListener()
+	}
+
+	static var listener: Task<Void, Never>?
+	static func startListener() {
+		listener?.cancel()
+		listener = Task {
+			//todo
+		}
+	}
+
+	static func sync() async {
+		await connect()
+		await poll()
 	}
 }
-
