@@ -24,3 +24,8 @@ try:
     connect()
 except KeyboardInterrupt:
     machine.reset()
+
+from redis import next_door_message
+
+while True:
+    print(next_door_message())
