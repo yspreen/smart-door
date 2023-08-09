@@ -28,4 +28,8 @@ except KeyboardInterrupt:
 from redis import next_door_message
 
 while True:
-    print(next_door_message())
+    msg = next_door_message()
+    if msg == "lock":
+        machine.Pin("LED", machine.Pin.OUT).value(0)
+    if msg == "unlock":
+        machine.Pin("LED", machine.Pin.OUT).value(1)
