@@ -1,5 +1,4 @@
 import socket
-from typing import Optional
 
 
 def get_message_and_remainder(data):
@@ -38,36 +37,19 @@ def get_message_and_remainder(data):
     return None, data
 
 
-def is_socket_closed(sock: Optional[socket.socket]) -> bool:
-    if not sock:
-        return True
-    try:
-        # this will try to read bytes without blocking and also without removing them from buffer (peek only)
-        data = sock.recv(16, socket.MSG_DONTWAIT | socket.MSG_PEEK)
-        if len(data) == 0:
-            return True
-    except BlockingIOError:
-        return False  # socket is open and reading from it would block
-    except ConnectionResetError:
-        return True  # socket was closed for some other reason
-    except Exception as e:
-        # print("unexpected exception when checking if a socket is closed:", e)
-        return True
-    return False
-
-
 class Redis:
     def __init__(self, host, port=6379, username=None, password=None):
         self.host = host
         self.port = port
         self.username = username
         self.password = password
-        self.socket: Optional[socket.socket] = None
+        self.socket = None
         self.unprocessed_bytes = ""
 
     def connect(self):
         self.socket = s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.host, self.port))
+        addr = socket.getaddrinfo(self.host, self.port)[0][-1]
+        s.connect(addr)
         if not password:
             return
         if not username:
@@ -75,19 +57,24 @@ class Redis:
             return
         s.sendall(f"AUTH {username} {password}\r\n".encode())
 
-    def ensure_connected(self):
-        if is_socket_closed(self.socket):
-            self.connect()
-
     def send(self, cmd):
-        self.ensure_connected()
-        s = self.socket
-        s.sendall(f"{cmd}\r\n".encode())
+        try:
+            self.socket.sendall(f"{cmd}\r\n".encode())
+        except:
+            self.connect()
+            self.socket.sendall(f"{cmd}\r\n".encode())
 
     def read_message(self):
-        self.ensure_connected()
         s = self.socket
         data = self.unprocessed_bytes
+        if get_message_and_remainder(data)[0] is not None:
+            msg, self.unprocessed_bytes = get_message_and_remainder(data)
+            return msg
+
+        try:
+            data += s.recv(1024).decode()
+        except:
+            self.connect()
 
         while True:
             message, data = get_message_and_remainder(data)
