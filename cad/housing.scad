@@ -1,6 +1,68 @@
 echo(version=version());
 
-$fn=1024;
+$fn= $preview ? 16 : 1024;
+
+// Higher definition curves
+$fs = $preview ? 2 : 0.01;
+
+module r_cube(size = [1, 1, 1], center = false, radius = 0.5, apply_to = "all") {
+	// If single value, convert to [x, y, z] vector
+	size = (size[0] == undef) ? [size, size, size] : size;
+
+	translate_min = radius;
+	translate_xmax = size[0] - radius;
+	translate_ymax = size[1] - radius;
+	translate_zmax = size[2] - radius;
+
+	diameter = radius * 2;
+
+	module build_point(type = "sphere", rotate = [0, 0, 0]) {
+		if (type == "sphere") {
+			sphere(r = radius);
+		} else if (type == "cylinder") {
+			rotate(a = rotate)
+			cylinder(h = diameter, r = radius, center = true);
+		}
+	}
+
+	obj_translate = (center == false) ?
+		[0, 0, 0] : [
+			-(size[0] / 2),
+			-(size[1] / 2),
+			-(size[2] / 2)
+		];
+
+	translate(v = obj_translate) {
+		hull() {
+			for (translate_x = [translate_min, translate_xmax]) {
+				x_at = (translate_x == translate_min) ? "min" : "max";
+				for (translate_y = [translate_min, translate_ymax]) {
+					y_at = (translate_y == translate_min) ? "min" : "max";
+					for (translate_z = [translate_min, translate_zmax]) {
+						z_at = (translate_z == translate_min) ? "min" : "max";
+
+						translate(v = [translate_x, translate_y, translate_z])
+						if (
+							(apply_to == "all") ||
+							(apply_to == "xmin" && x_at == "min") || (apply_to == "xmax" && x_at == "max") ||
+							(apply_to == "ymin" && y_at == "min") || (apply_to == "ymax" && y_at == "max") ||
+							(apply_to == "zmin" && z_at == "min") || (apply_to == "zmax" && z_at == "max")
+						) {
+							build_point("sphere");
+						} else {
+							rotate = 
+								(apply_to == "xmin" || apply_to == "xmax" || apply_to == "x") ? [0, 90, 0] : (
+								(apply_to == "ymin" || apply_to == "ymax" || apply_to == "y") ? [90, 90, 0] :
+								[0, 0, 0]
+							);
+							build_point("cylinder", rotate);
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 measured_sensor_height = 39.78;
 measured_sensor_with_wing_height = 46.44;
@@ -20,13 +82,25 @@ servo_l_outer = 28.82;
 servo_w = 20.70;
 servo_h = 15;
 
+// h[eight], r[adius], [rou]n[d]
+module r_cylinder(h, r, n=0) {
+    if (n == 0) {
+        cylinder(h, r, r);
+    } else {        
+      rotate_extrude(convexity=1) {
+        offset(r=n) offset(delta=-n) square([r,h]);
+        square([n, h]);
+      }
+  }
+}
+
 module cover() {
     translate([0, 0, circle_h - wall])
     difference() {
-        cylinder(wall, circle_d/2, circle_d/2);
+        r_cylinder(wall, circle_d/2);
         
         translate([0, 0, -0.1])
-        cylinder(wall * 2, servo_l_center - servo_l_outer, servo_l_center - servo_l_outer);
+        r_cylinder(wall * 2, servo_l_center - servo_l_outer);
     }
 }
 
@@ -41,12 +115,12 @@ module bow1() {
         cube([1000, 1000, 1000], center = true);
         difference() {
             union() {
-                cylinder(circle_h, circle_d / 2 + wall, circle_d / 2 + wall);
+                r_cylinder(circle_h, circle_d / 2 + wall);
                 servo_support();
             }
             
             translate([0,0,-0.001])
-            cylinder(circle_h * 1.001, circle_d / 2, circle_d / 2);
+            r_cylinder(circle_h * 1.001, circle_d / 2);
         }
     }
 }
@@ -57,17 +131,30 @@ module bow2() {
         union() {
             cover();
             difference() {
-                cylinder(wall, circle_d / 2 + wall + circle_foot, circle_d / 2 + wall + circle_foot);
+                difference() {
+                    translate([0,0,-wall])
+                    r_cylinder(wall * 2, circle_d / 2 + wall + circle_foot, 0.6);
+                    translate([-0.001, -50, -100 + 0.001])
+                    cube(100);
+                }
                 
                 translate([0,0,-0.001])
-                cylinder(circle_h * 1.001, circle_d / 2 - circle_foot, circle_d / 2 - circle_foot);
+                r_cylinder(circle_h * 1.001, circle_d / 2 - circle_foot);
             }
         }
     };
-    translate([-circle_foot, circle_d / 2 - circle_foot, 0])
-    cube([circle_foot, wall + circle_foot * 2, wall]);
-    translate([-circle_foot, -circle_d / 2 - circle_foot - wall, 0])
-    cube([circle_foot, wall + circle_foot * 2, wall]);
+    difference() {
+        translate([-circle_foot, circle_d / 2 - circle_foot, -10])
+        r_cube([circle_foot, wall + circle_foot * 2, wall + 10], radius=0.6, apply_to="xmin");
+        translate([-50 -0.001, -50, -100 + 0.001])
+        cube(100);
+    }
+    difference() {
+        translate([-circle_foot, -circle_d / 2 - circle_foot - wall, -10])
+        r_cube([circle_foot, wall + circle_foot * 2, wall + 10], radius=0.6, apply_to="xmin");
+        translate([-50 -0.001, -50, -100 + 0.001])
+        cube(100);
+    }
 }
 
 module servo_walls() {
@@ -99,7 +186,7 @@ module servo_box() {
     }
 }
 
-module example_intersection()
+module entrypoint()
 {
 	/*intersection() {
 		difference() {
@@ -125,4 +212,4 @@ module example_intersection()
     }
 }
 
-example_intersection();
+entrypoint();
