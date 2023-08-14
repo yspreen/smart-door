@@ -58,6 +58,20 @@ module r_cylinder(h, r, n=0) {
   }
 }
 
+// h[eight], r[adius], i[nner radius], [rou]n[d]
+module r_ring(h, r, i, n=0, flatten="none") {
+    rotate_extrude(convexity=1) {
+        translate([i, 0])
+         offset(r=n, $fn = $fn / 5)
+          offset(delta=-n, $fn = $fn / 5)
+           square([r - i, h]);
+        if (flatten == "minz") {
+           translate([i, 0])
+            square([r - i, h / 2]);
+        }
+    }
+}
+
 module cover() {
     translate([0, 0, circle_h - wall])
     difference() {
@@ -96,17 +110,13 @@ module bow2() {
         cube([1000, 1000, 1000], center = true);
         union() {
             cover();
-            difference() {
-                difference() {
-                    translate([0,0,-wall])
-                    r_cylinder(wall * 2, circle_d / 2 + wall + circle_foot, rounding);
-                    translate([-0.001, -50, -100 + 0.001])
-                    cube(100);
-                }
-                
-                translate([0,0,-0.001])
-                r_cylinder(circle_h * 1.001, circle_d / 2 - circle_foot);
-            }
+            r_ring(
+                wall,
+                circle_d / 2 + wall + circle_foot,
+                circle_d / 2 - circle_foot,
+                rounding,
+                flatten="minz"
+            );
         }
     };
     difference() {
