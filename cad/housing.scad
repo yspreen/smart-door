@@ -1,6 +1,6 @@
 echo(version=version());
 
-$fn=64;
+$fn=1024;
 
 measured_sensor_height = 39.78;
 measured_sensor_with_wing_height = 46.44;
@@ -12,37 +12,62 @@ measured_h = 28.99 + MISMEASURE;
 wall = 3;
 
 circle_foot = 2;
-circle_d = 43.37 + 0.8 + circle_foot;
+circle_d = 43.37 + 1.0 + circle_foot;
 circle_h = measured_h - wing_height + wall + 0.5; // 25;
 
 servo_l_center = 37.56;
 servo_l_outer = 28.82;
 servo_w = 20.70;
-servo_h = 20;
+servo_h = 15;
+
+module cover() {
+    translate([0, 0, circle_h - wall])
+    difference() {
+        cylinder(wall, circle_d/2, circle_d/2);
+        
+        translate([0, 0, -0.1])
+        cylinder(wall * 2, servo_l_center - servo_l_outer, servo_l_center - servo_l_outer);
+    }
+}
+
+module servo_support() {
+    translate([circle_d / 2 + wall / 2 - 0.05, 0, circle_h/2])
+    cube([servo_l_outer + wall, servo_w + wall * 2, circle_h], center = true);
+}
 
 module bow1() {
     intersection() {
         translate([500, 0, 0])
         cube([1000, 1000, 1000], center = true);
         difference() {
-            cylinder(circle_h, circle_d / 2 + wall, circle_d / 2 + wall);
+            union() {
+                cylinder(circle_h, circle_d / 2 + wall, circle_d / 2 + wall);
+                servo_support();
+            }
             
             translate([0,0,-0.001])
             cylinder(circle_h * 1.001, circle_d / 2, circle_d / 2);
         }
     }
 }
-module bow2() {
+module bow2() {        
     intersection() {
         translate([500, 0, 0])
         cube([1000, 1000, 1000], center = true);
-        difference() {
-            cylinder(wall, circle_d / 2 + wall + circle_foot, circle_d / 2 + wall + circle_foot);
-            
-            translate([0,0,-0.001])
-            cylinder(circle_h * 1.001, circle_d / 2 - circle_foot, circle_d / 2 - circle_foot);
+        union() {
+            cover();
+            difference() {
+                cylinder(wall, circle_d / 2 + wall + circle_foot, circle_d / 2 + wall + circle_foot);
+                
+                translate([0,0,-0.001])
+                cylinder(circle_h * 1.001, circle_d / 2 - circle_foot, circle_d / 2 - circle_foot);
+            }
         }
-    }
+    };
+    translate([-circle_foot, circle_d / 2 - circle_foot, 0])
+    cube([circle_foot, wall + circle_foot * 2, wall]);
+    translate([-circle_foot, -circle_d / 2 - circle_foot - wall, 0])
+    cube([circle_foot, wall + circle_foot * 2, wall]);
 }
 
 module servo_walls() {
