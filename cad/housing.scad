@@ -6,7 +6,8 @@ measured_sensor_height = 39.78;
 measured_sensor_with_wing_height = 46.44;
 wing_height = measured_sensor_with_wing_height - measured_sensor_height;
 
-measured_h = 28.99;
+MISMEASURE = 20;
+measured_h = 28.99 + MISMEASURE;
 
 wall = 3;
 
