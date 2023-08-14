@@ -1,66 +1,30 @@
 echo(version=version());
 
-$fn= $preview ? 16 : 1024;
+$fn= $preview ? 64 : 256;
 
 // Higher definition curves
-$fs = $preview ? 2 : 0.01;
+// $fs = $preview ? 2 : 0.01;
 
-module r_cube(size = [1, 1, 1], center = false, radius = 0.5, apply_to = "all") {
+module r_cube(size = [1, 1, 1], center = false, radius = 0.5) {
 	// If single value, convert to [x, y, z] vector
 	size = (size[0] == undef) ? [size, size, size] : size;
 
-	translate_min = radius;
-	translate_xmax = size[0] - radius;
-	translate_ymax = size[1] - radius;
-	translate_zmax = size[2] - radius;
+	translate = (center == false) ?
+		[radius, radius, radius] :
+		[
+			radius - (size[0] / 2),
+			radius - (size[1] / 2),
+			radius - (size[2] / 2)
+	];
 
-	diameter = radius * 2;
-
-	module build_point(type = "sphere", rotate = [0, 0, 0]) {
-		if (type == "sphere") {
-			sphere(r = radius);
-		} else if (type == "cylinder") {
-			rotate(a = rotate)
-			cylinder(h = diameter, r = radius, center = true);
-		}
-	}
-
-	obj_translate = (center == false) ?
-		[0, 0, 0] : [
-			-(size[0] / 2),
-			-(size[1] / 2),
-			-(size[2] / 2)
-		];
-
-	translate(v = obj_translate) {
-		hull() {
-			for (translate_x = [translate_min, translate_xmax]) {
-				x_at = (translate_x == translate_min) ? "min" : "max";
-				for (translate_y = [translate_min, translate_ymax]) {
-					y_at = (translate_y == translate_min) ? "min" : "max";
-					for (translate_z = [translate_min, translate_zmax]) {
-						z_at = (translate_z == translate_min) ? "min" : "max";
-
-						translate(v = [translate_x, translate_y, translate_z])
-						if (
-							(apply_to == "all") ||
-							(apply_to == "xmin" && x_at == "min") || (apply_to == "xmax" && x_at == "max") ||
-							(apply_to == "ymin" && y_at == "min") || (apply_to == "ymax" && y_at == "max") ||
-							(apply_to == "zmin" && z_at == "min") || (apply_to == "zmax" && z_at == "max")
-						) {
-							build_point("sphere");
-						} else {
-							rotate = 
-								(apply_to == "xmin" || apply_to == "xmax" || apply_to == "x") ? [0, 90, 0] : (
-								(apply_to == "ymin" || apply_to == "ymax" || apply_to == "y") ? [90, 90, 0] :
-								[0, 0, 0]
-							);
-							build_point("cylinder", rotate);
-						}
-					}
-				}
-			}
-		}
+	translate(v = translate)
+	minkowski() {
+		cube(size = [
+			size[0] - (radius * 2),
+			size[1] - (radius * 2),
+			size[2] - (radius * 2)
+		]);
+		sphere(r = radius, $fn = $fn / 5);
 	}
 }
 
@@ -88,7 +52,7 @@ module r_cylinder(h, r, n=0) {
         cylinder(h, r, r);
     } else {        
       rotate_extrude(convexity=1) {
-        offset(r=n) offset(delta=-n) square([r,h]);
+        offset(r=n, $fn = $fn / 5) offset(delta=-n, $fn = $fn / 5) square([r,h]);
         square([n, h]);
       }
   }
@@ -124,7 +88,9 @@ module bow1() {
         }
     }
 }
-module bow2() {        
+module bow2() {     
+    rounding=0.6;
+    
     intersection() {
         translate([500, 0, 0])
         cube([1000, 1000, 1000], center = true);
@@ -133,7 +99,7 @@ module bow2() {
             difference() {
                 difference() {
                     translate([0,0,-wall])
-                    r_cylinder(wall * 2, circle_d / 2 + wall + circle_foot, 0.6);
+                    r_cylinder(wall * 2, circle_d / 2 + wall + circle_foot, rounding);
                     translate([-0.001, -50, -100 + 0.001])
                     cube(100);
                 }
@@ -145,13 +111,13 @@ module bow2() {
     };
     difference() {
         translate([-circle_foot, circle_d / 2 - circle_foot, -10])
-        r_cube([circle_foot, wall + circle_foot * 2, wall + 10], radius=0.6, apply_to="xmin");
+        r_cube([circle_foot + rounding, wall + circle_foot * 2, wall + 10], radius=rounding);
         translate([-50 -0.001, -50, -100 + 0.001])
         cube(100);
     }
     difference() {
         translate([-circle_foot, -circle_d / 2 - circle_foot - wall, -10])
-        r_cube([circle_foot, wall + circle_foot * 2, wall + 10], radius=0.6, apply_to="xmin");
+        r_cube([circle_foot + rounding, wall + circle_foot * 2, wall + 10], radius=rounding);
         translate([-50 -0.001, -50, -100 + 0.001])
         cube(100);
     }
