@@ -91,21 +91,7 @@ module half_cube(size = [1, 1, 1], center = false) {
         polygon(points=[[0, 0],[size[0], 0],[0, size[1]]], paths=[[0,1,2]]);
 }
 
-module servo_support() {
-    translate([circle_d/2, -servo_w/2 - wall])
-    cube([-circle_d/2 + servo_l_center + wall, servo_w + wall * 2, circle_h]);
-    
-    translate([circle_d/2, -servo_w/2 - wall + servo_w + wall * 2])
-    rotate([0, 0, 180])
-    half_cube([2, servo_w / 2, circle_h]);
-    
-    translate([circle_d/2, -servo_w/2 - wall, circle_h])
-    rotate([180, 0, 180])
-    half_cube([2, servo_w / 2, circle_h]);
-}
-
 module bow1() {
-    servo_support();
     intersection() {
         translate([500, 0, 0])
         cube([1000, 1000, 1000], center = true);
@@ -154,14 +140,32 @@ module servo_walls() {
     union() {
         translate([servo_l_outer/2 + wall/2,0,0])
         translate([0,0,(wall + servo_h)/2])
-        cube([wall, servo_w + wall*2, wall + servo_h], center = true);
+        r_cube([wall, servo_w + wall*2, wall + servo_h], center = true, radius=0.8);
         translate([0,servo_w/2 + wall/2,0])
-        translate([0,0,(wall + servo_h)/2])
-        cube([servo_l_outer, wall, wall + servo_h], center = true);
+        translate([wall / 2, 0,(wall + servo_h)/2])
+        r_cube([servo_l_outer + wall, wall, wall + servo_h], center = true, radius=0.8);
         translate([0,-servo_w/2 - wall/2,0])
-        translate([0,0,(wall + servo_h)/2])
-        cube([servo_l_outer, wall, wall + servo_h], center = true);
+        translate([wall / 2,0,(wall + servo_h)/2])
+        r_cube([servo_l_outer + wall, wall, wall + servo_h], center = true, radius=0.8);
     }
+}
+
+module servo_support() {
+    translate([circle_d/2, -servo_w/2 - wall])
+    difference() {
+        translate([0, 0, -50])
+        r_cube([-circle_d/2 + servo_l_center + wall, servo_w + wall * 2, circle_h + 50], radius=0.8);
+        translate([0, 0, -100 + 0.001])
+        cube([100, 100, 100]);
+    }
+    
+    translate([circle_d/2 + 1, -servo_w/2 - wall + servo_w + wall * 2])
+    rotate([0, 0, 180])
+    half_cube([3, servo_w / 2, circle_h]);
+    
+    translate([circle_d/2 + 1, -servo_w/2 - wall, circle_h])
+    rotate([180, 0, 180])
+    half_cube([3, servo_w / 2, circle_h]);
 }
 
 module servo_base() {
@@ -177,6 +181,7 @@ module servo_box() {
         servo_walls();
         servo_base();
     }
+    servo_support();
 }
 
 module entrypoint()
