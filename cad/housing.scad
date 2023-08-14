@@ -74,27 +74,44 @@ module r_ring(h, r, i, n=0, flatten="none") {
 
 module cover() {
     translate([0, 0, circle_h - wall])
-    difference() {
-        r_cylinder(wall, circle_d/2);
-        
-        translate([0, 0, -0.1])
-        r_cylinder(wall * 2, servo_l_center - servo_l_outer);
-    }
+        r_ring(
+            wall,
+            circle_d/2 + wall,
+            servo_l_center - servo_l_outer,
+            1,
+            flatten="minz"
+        );
+}
+
+module half_cube(size = [1, 1, 1], center = false) {
+    translate([center ? -size[0] / 2 : 0, 0, 0])
+    translate([0, center ? -size[1] / 2 : 0, 0])
+    translate([0, 0, center ? -size[2] / 2 : 0])
+    linear_extrude(size[2])
+        polygon(points=[[0, 0],[size[0], 0],[0, size[1]]], paths=[[0,1,2]]);
 }
 
 module servo_support() {
-    translate([circle_d / 2 + wall / 2 - 0.05, 0, circle_h/2])
-    cube([servo_l_outer + wall, servo_w + wall * 2, circle_h], center = true);
+    translate([circle_d/2, -servo_w/2 - wall])
+    cube([-circle_d/2 + servo_l_center + wall, servo_w + wall * 2, circle_h]);
+    
+    translate([circle_d/2, -servo_w/2 - wall + servo_w + wall * 2])
+    rotate([0, 0, 180])
+    half_cube([2, servo_w / 2, circle_h]);
+    
+    translate([circle_d/2, -servo_w/2 - wall, circle_h])
+    rotate([180, 0, 180])
+    half_cube([2, servo_w / 2, circle_h]);
 }
 
 module bow1() {
+    servo_support();
     intersection() {
         translate([500, 0, 0])
         cube([1000, 1000, 1000], center = true);
         difference() {
             union() {
-                r_cylinder(circle_h, circle_d / 2 + wall);
-                servo_support();
+                r_cylinder(circle_h - wall, circle_d / 2 + wall);
             }
             
             translate([0,0,-0.001])
@@ -149,7 +166,7 @@ module servo_walls() {
 
 module servo_base() {
     translate([0,0,wall/2])
-    cube([servo_l_outer, servo_w, wall], center = true);
+    cube([servo_l_outer - 2, servo_w, wall], center = true);
 }
 
 module servo_box() {
