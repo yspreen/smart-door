@@ -1,11 +1,13 @@
 from time import sleep
 from machine import Pin, PWM
 
+from redis import send_locked
+
 pwm = PWM(Pin(28))
 pwm.freq(50)
 
 locked_angle = 1000
-unlocked_angle = 9000
+unlocked_angle = 5000
 relay_delay_s = 0.1
 servo_delay_s = 3.0
 
@@ -21,6 +23,7 @@ def move_servo_to(angle):
 
 
 def unlock_door():
+    send_locked(False)
     set_relay_on(True)
     sleep(relay_delay_s)
     move_servo_to(unlocked_angle)
@@ -30,6 +33,7 @@ def unlock_door():
 
 
 def lock_door():
+    send_locked(True)
     set_relay_on(True)
     sleep(relay_delay_s)
     move_servo_to(locked_angle)
