@@ -1,38 +1,77 @@
 from time import sleep
-from machine import Pin, PWM
 
-pwm = PWM(Pin(28))
-pwm.freq(50)
-
-locked_angle = 1000
-unlocked_angle = 9000
-relay_delay_s = 0.1
-servo_delay_s = 3.0
+import machine
 
 
-def set_relay_on(v):
-    Pin(18, mode=Pin.OUT).value(1 if v else 0)
-    Pin("LED").value(1 if v else 0)
+import network
+from secret import ssid, password
+
+# Connect to WLAN
+wlan = network.WLAN(network.STA_IF)
 
 
-def move_servo_to(angle):
-    pwm.duty_u16(angle)
-    sleep(0.01)
+def connect():
+    sleep(1)
+    wlan.active(True)
+    sleep(1)
+    wlan.connect(ssid, password)
+    fails = 0
+    while wlan.isconnected() == False:
+        fails += 1
+        if fails > 15:
+            sleep(1)
+            wlan.active(False)
+            sleep(1)
+            return connect()
+        print("Waiting for connection...")
+        sleep(1)
+    print(wlan.ifconfig()[0])
 
 
-def unlock_door():
-    set_relay_on(True)
-    sleep(relay_delay_s)
-    move_servo_to(unlocked_angle)
-    sleep(servo_delay_s)
-    set_relay_on(False)
-    sleep(relay_delay_s)
+try:
+    connect()
+except KeyboardInterrupt:
+    machine.reset()
 
 
-def lock_door():
-    set_relay_on(True)
-    sleep(relay_delay_s)
-    move_servo_to(locked_angle)
-    sleep(servo_delay_s)
-    set_relay_on(False)
-    sleep(relay_delay_s)
+door_should_be = False
+door_is = False
+
+
+def core0_thread():
+    global door_should_be, door_is
+
+    from redis import next_door_message
+
+    while True:
+        sleep(0.05)
+        msg = ""
+        try:
+            msg = next_door_message()
+        except Exception as e:
+            print(e)
+        if msg == "lock":
+            door_should_be = False
+        if msg == "unlock":
+            door_should_be = True
+
+        gpio_loop_iter()
+
+
+from door import lock_door, unlock_door
+
+
+def gpio_loop_iter():
+    global door_should_be, door_is
+
+    if door_should_be == door_is:
+        return
+    door_is = door_should_be
+    if door_is:
+        unlock_door()
+    else:
+        lock_door()
+
+
+core0_thread()
+machine.reset()

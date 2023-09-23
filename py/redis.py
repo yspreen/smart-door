@@ -1,4 +1,5 @@
 import socket
+import errno
 
 
 def get_message_and_remainder(data):
@@ -45,6 +46,7 @@ class Redis:
         self.password = password
         self.socket = None
         self.unprocessed_bytes = ""
+        self.subscription = None
 
     def connect(self):
         self.socket = s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -57,10 +59,14 @@ class Redis:
             return
         s.sendall(f"AUTH {username} {password}\r\n".encode())
 
-    def send(self, cmd):
+    def send(self, cmd, unsubscribe_before=True):
+        if unsubscribe_before and self.subscription is not None:
+            self.send(f"UNSUBSCRIBE {self.subscription}", False)
+            self.subscription = None
+
         try:
             self.socket.sendall(f"{cmd}\r\n".encode())
-        except:
+        except Exception:
             self.connect()
             self.socket.sendall(f"{cmd}\r\n".encode())
 
@@ -73,7 +79,11 @@ class Redis:
 
         try:
             data += s.recv(1024).decode()
-        except:
+        except OSError as e:
+            if e.errno == errno.ETIMEDOUT:
+                return None
+            self.connect()
+        except Exception as e:
             self.connect()
 
         while True:
@@ -81,16 +91,23 @@ class Redis:
             if message is not None:
                 self.unprocessed_bytes = data
                 return message
-            data += s.recv(1024).decode()
+            try:
+                data += s.recv(1024).decode()
+            except OSError as e:
+                if e.errno == errno.ETIMEDOUT:
+                    return None
 
     def first_channel_message(self, channel):
-        self.send(f"SUBSCRIBE {channel}")
+        if self.subscription != channel:
+            self.send(f"SUBSCRIBE {channel}")
+            self.subscription = channel
 
-        while True:
-            msg = self.read_message()
-            if isinstance(msg, list) and msg[0] == "message":
-                self.send(f"UNSUBSCRIBE {channel}")
-                return msg[2]
+        self.socket.settimeout(0.1)
+        msg = self.read_message()
+        self.socket.settimeout(None)
+
+        if isinstance(msg, list) and msg[0] == "message":
+            return msg[2]
 
 
 door = "***REMOVED***"
