@@ -26,11 +26,12 @@ struct DoorState: Codable {
 }
 
 enum RedisClient {
-	static let host = "nevercommit"
-	static let port = 123
-	static let username = "nevercommit"
-	static let password = "nevercommit"
-	static let doorId = "..."
+	static let doorId = "***REMOVED***"
+
+	static let host = "***REMOVED***"
+	static let port = ***REMOVED***
+	static let username = "admin"
+	static let password = "***REMOVED***"
 	static var redis: RedisConnection?
 	static var redisListener: RedisConnection?
 

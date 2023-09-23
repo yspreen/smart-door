@@ -92,6 +92,14 @@ class Redis:
                 self.socket.close()
                 return msg[2]
 
+
+door = "***REMOVED***"
+
+host = "***REMOVED***"
+port = ***REMOVED***
+username = "admin"
+password = "***REMOVED***"
+
 # print(f"redis://{username}:{password}@{host}:{port}")
 
 # r = Redis(host, port, username, password)
