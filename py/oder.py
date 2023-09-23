@@ -1,66 +1,38 @@
-import network
-import socket
 from time import sleep
-from time import sleep
+from machine import Pin, PWM
 
-# from picozero import pico_temp_sensor, pico_led
-import machine
+pwm = PWM(Pin(28))
+pwm.freq(50)
 
-from redis import next_door_message
-from door import lock_door, unlock_door
-from secret import *
-
-
-def connect():
-    # Connect to WLAN
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    wlan.connect(ssid, password)
-    while wlan.isconnected() == False:
-        print("Waiting for connection...")
-        sleep(1)
-    print(wlan.ifconfig()[0])
+locked_angle = 1000
+unlocked_angle = 9000
+relay_delay_s = 0.1
+servo_delay_s = 3.0
 
 
-try:
-    connect()
-except KeyboardInterrupt:
-    machine.reset()
+def set_relay_on(v):
+    Pin(18, mode=Pin.OUT).value(1 if v else 0)
+    Pin("LED").value(1 if v else 0)
 
 
-import _thread
-
-door_should_be = False
-door_is = False
-
-
-def core0_thread():
-    global door_should_be, door_is
-    while True:
-        msg = ""
-        try:
-            msg = next_door_message()
-        except:
-            pass
-        if msg == "lock":
-            door_should_be = False
-        if msg == "unlock":
-            door_should_be = True
+def move_servo_to(angle):
+    pwm.duty_u16(angle)
+    sleep(0.01)
 
 
-def core1_thread():
-    global door_should_be, door_is
-    while True:
-        sleep(0.05)
-        if door_should_be == door_is:
-            continue
-        door_is = door_should_be
-        if door_is:
-            unlock_door()
-        else:
-            lock_door()
+def unlock_door():
+    set_relay_on(True)
+    sleep(relay_delay_s)
+    move_servo_to(unlocked_angle)
+    sleep(servo_delay_s)
+    set_relay_on(False)
+    sleep(relay_delay_s)
 
 
-second_thread = _thread.start_new_thread(core1_thread, ())
-
-core0_thread()
+def lock_door():
+    set_relay_on(True)
+    sleep(relay_delay_s)
+    move_servo_to(locked_angle)
+    sleep(servo_delay_s)
+    set_relay_on(False)
+    sleep(relay_delay_s)

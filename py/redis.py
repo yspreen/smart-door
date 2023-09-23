@@ -89,7 +89,7 @@ class Redis:
         while True:
             msg = self.read_message()
             if isinstance(msg, list) and msg[0] == "message":
-                self.socket.close()
+                self.send(f"UNSUBSCRIBE {channel}")
                 return msg[2]
 
 
@@ -106,6 +106,8 @@ password = "***REMOVED***"
 # print(r.first_channel_message("test"))
 # print(r.first_channel_message("test"))
 
+client = Redis(host, port, username, password)
+
 
 def next_door_message():
-    return Redis(host, port, username, password).first_channel_message(f"door_{door}")
+    return client.first_channel_message(f"door_{door}")
