@@ -1,4 +1,4 @@
-from time import sleep
+from time import sleep, time
 
 import machine
 
@@ -48,6 +48,8 @@ def core0_thread():
         msg = ""
         try:
             msg = next_door_message()
+            if msg:
+                print(msg)
         except Exception as e:
             print(e)
         if msg == "lock":
@@ -60,15 +62,33 @@ def core0_thread():
 
 from door import lock_door, unlock_door
 
+from machine import Pin
+
+open_since = time()
+
+pin_hinge = Pin(14, mode=Pin.IN, pull=Pin.PULL_UP)
+pin_handle = Pin(15, mode=Pin.IN, pull=Pin.PULL_UP)
+
 
 def gpio_loop_iter():
-    global door_should_be, door_is
+    global door_should_be, door_is, open_since
+
+    hinge_open = pin_hinge.value()
+    handle_pressed = not pin_handle.value()
+
+    if door_is and time() > open_since + 15:
+        door_should_be = False
+    if hinge_open:
+        door_should_be = True
+    if handle_pressed:
+        door_should_be = True
 
     if door_should_be == door_is:
         return
     door_is = door_should_be
     if door_is:
         unlock_door()
+        open_since = time()
     else:
         lock_door()
 

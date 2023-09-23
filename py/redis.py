@@ -126,5 +126,10 @@ password = "***REMOVED***"
 client = Redis(host, port, username, password)
 
 
+def send_locked(is_locked):
+    cmd = "lock" if is_locked else "unlock"
+    return client.send(f"PUBLISH door_{door} {cmd}")
+
+
 def next_door_message():
     return client.first_channel_message(f"door_{door}")
