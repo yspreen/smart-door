@@ -8,11 +8,36 @@ from secret import ssid, password
 from redis import ping as redis_ping
 from hinge_manager import HingeManager
 
+
+from door import lock_door, unlock_door
+
+from machine import Pin
+
+
 # Connect to WLAN
 wlan = network.WLAN(network.STA_IF)
 
-
 AUTO_LOCK_AFTER = 20  # seconds
+
+pin_hinge = Pin(14, mode=Pin.IN, pull=Pin.PULL_UP)
+pin_handle = Pin(15, mode=Pin.IN, pull=Pin.PULL_UP)
+
+
+hinge_manager = 0
+open_since = 0
+door_should_open = 0
+door_is_open = 0
+last_ping = 0
+
+
+def reset_vars():
+    global hinge_manager, open_since, door_should_open, door_is_open, last_ping
+
+    hinge_manager = HingeManager()
+    open_since = clock.get_time()
+    door_should_open = False
+    door_is_open = True
+    last_ping = clock.get_time()
 
 
 def connect():
@@ -33,21 +58,12 @@ def connect():
     print(wlan.ifconfig()[0])
 
 
-connect()
-
-
-door_should_open = False
-door_is_open = True
-hinge_manager = HingeManager()
-
-
-last_ping = clock.get_time()
-
-
 def core0_thread():
     global door_should_open, door_is_open
 
     from redis import next_door_message
+
+    reset_vars()
 
     while True:
         sleep(0.01)
@@ -55,6 +71,7 @@ def core0_thread():
         try:
             msg = next_door_message()
             if msg:
+                last_ping = clock.get_time()
                 print(msg)
         except Exception as e:
             print(e)
@@ -76,17 +93,8 @@ def ping():
     for _ in range(3):  # 3 tries
         if redis_ping() == "pong":
             return
+        sleep(1)
     raise ValueError("disconnected")
-
-
-from door import lock_door, unlock_door
-
-from machine import Pin
-
-open_since = clock.get_time()
-
-pin_hinge = Pin(14, mode=Pin.IN, pull=Pin.PULL_UP)
-pin_handle = Pin(15, mode=Pin.IN, pull=Pin.PULL_UP)
 
 
 def gpio_loop_iter():
@@ -108,6 +116,8 @@ def gpio_loop_iter():
     if door_should_open == door_is_open:
         return
 
+    last_ping = clock.get_time()
+
     door_is_open = door_should_open
     if door_is_open:
         unlock_door()
@@ -116,19 +126,13 @@ def gpio_loop_iter():
         lock_door()
 
 
-try:
-    core0_thread()
-except Exception:
-    pass
-sleep(1)
-try:
-    core0_thread()
-except Exception:
-    pass
-sleep(1)
-try:
-    core0_thread()
-except Exception:
-    pass
-sleep(1)
+connect()
+
+for _ in range(3):
+    try:
+        core0_thread()
+    except Exception:
+        pass
+    sleep(1)
+
 machine.reset()
