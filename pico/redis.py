@@ -47,6 +47,7 @@ class Redis:
         self.socket = None
         self.unprocessed_bytes = ""
         self.subscription = None
+        self.timeout = None
 
     def connect(self):
         self.socket = s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -56,13 +57,17 @@ class Redis:
             return
         if not username:
             s.sendall(f"AUTH {password}\r\n".encode())
-            return
-        s.sendall(f"AUTH {username} {password}\r\n".encode())
+        else:
+            s.sendall(f"AUTH {username} {password}\r\n".encode())
+        self.read_message()
 
     def send(self, cmd, unsubscribe_before=True):
         if unsubscribe_before and self.subscription is not None:
-            self.send(f"UNSUBSCRIBE {self.subscription}", False)
             self.subscription = None
+            self.send(f"UNSUBSCRIBE {self.subscription}", False)
+            prev = self.set_timeout(1)
+            _ = self.read_message()
+            self.socket.settimeout(prev)
 
         try:
             self.socket.sendall(f"{cmd}\r\n".encode())
@@ -98,14 +103,20 @@ class Redis:
                     return None
                 raise e
 
+    def set_timeout(self, timeout):
+        old_value = self.timeout
+        self.socket.settimeout(timeout)
+        self.timeout = timeout
+        return old_value
+
     def first_channel_message(self, channel):
         if self.subscription != channel:
             self.send(f"SUBSCRIBE {channel}")
             self.subscription = channel
 
-        self.socket.settimeout(0.1)
+        prev = self.set_timeout(0.1)
         msg = self.read_message()
-        self.socket.settimeout(None)
+        self.socket.settimeout(prev)
 
         if isinstance(msg, list) and msg[0] == "message":
             return msg[2]
@@ -129,7 +140,16 @@ client = Redis(host, port, username, password)
 
 def send_locked(is_locked):
     cmd = "lock" if is_locked else "unlock"
-    return client.send(f"PUBLISH door_{door} {cmd}")
+    client.send(f"PUBLISH door_{door} {cmd}")
+    return client.read_message()
+
+
+def ping():
+    client.send(f"PING pong")
+    msg = client.read_message()
+    if isinstance(msg, list) and len(msg):
+        return msg[0]
+    return msg
 
 
 def next_door_message():
