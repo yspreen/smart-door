@@ -20,6 +20,7 @@ class HingeManager:
         )
 
     def tick(self, door_is, door_should_be, hinge_open):
+        reset_timer = False
         was_open = self.pin_open
         self.pin_open = hinge_open
 
@@ -31,9 +32,10 @@ class HingeManager:
 
         if self.is_open_for_some_time():
             self.was_open_for_some_time = True
+            reset_timer = True
         if self.is_closed_for_some_time() and self.was_open_for_some_time:
-            door_is = True
-            door_should_be = False
             self.was_open_for_some_time = False
+            door_is = True
+            reset_timer = True
 
-        return door_is, door_should_be, self.is_open_for_some_time()
+        return door_is, door_should_be, reset_timer

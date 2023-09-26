@@ -13,7 +13,7 @@ pwm.freq(50)
 unlocked_angle = 1000 + 8000 * 0 / 180  # 0deg
 locked_angle = 1000 + 8000 * 60 / 180  # 60deg
 relay_delay_s = 0.1
-servo_delay_s = 3.0
+servo_delay_s = 2.0
 
 
 def set_relay_on(v):

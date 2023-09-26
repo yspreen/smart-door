@@ -5,10 +5,14 @@ from time import sleep
 
 from clock import clock
 from secret import ssid, password
+from redis import ping as redis_ping
 from hinge_manager import HingeManager
 
 # Connect to WLAN
 wlan = network.WLAN(network.STA_IF)
+
+
+AUTO_LOCK_AFTER = 20  # seconds
 
 
 def connect():
@@ -35,13 +39,16 @@ except KeyboardInterrupt:
     machine.reset()
 
 
-door_should_be = False
-door_is = False
+door_should_open = False
+door_is_open = True
 hinge_manager = HingeManager()
 
 
+last_ping = clock.get_time()
+
+
 def core0_thread():
-    global door_should_be, door_is
+    global door_should_open, door_is_open
 
     from redis import next_door_message
 
@@ -56,11 +63,23 @@ def core0_thread():
             print(e)
             return
         if msg == "lock":
-            door_should_be = False
+            door_should_open = False
         if msg == "unlock":
-            door_should_be = True
+            door_should_open = True
 
         gpio_loop_iter()
+        ping()
+
+
+def ping():
+    global last_ping
+    if last_ping + 60 > clock.get_time():
+        return
+    last_ping = clock.get_time()
+    for _ in range(3):  # 3 tries
+        if redis_ping() == "pong":
+            return
+    raise ValueError("disconnected")
 
 
 from door import lock_door, unlock_door
@@ -74,26 +93,26 @@ pin_handle = Pin(15, mode=Pin.IN, pull=Pin.PULL_UP)
 
 
 def gpio_loop_iter():
-    global door_should_be, door_is, open_since
+    global door_should_open, door_is_open, open_since
 
     hinge_open = pin_hinge.value()
     handle_pressed = not pin_handle.value()
 
-    if door_is and clock.get_time() > open_since + 15:
-        door_should_be = False
-    door_is, door_should_be, reset_timer = hinge_manager.tick(
-        door_is, door_should_be, hinge_open
+    if door_is_open and clock.get_time() > open_since + AUTO_LOCK_AFTER:
+        door_should_open = False
+    door_is_open, door_should_open, reset_timer = hinge_manager.tick(
+        door_is_open, door_should_open, hinge_open
     )
     if reset_timer:
         open_since = clock.get_time()
     if handle_pressed:
-        door_should_be = True
+        door_should_open = True
 
-    if door_should_be == door_is:
+    if door_should_open == door_is_open:
         return
 
-    door_is = door_should_be
-    if door_is:
+    door_is_open = door_should_open
+    if door_is_open:
         unlock_door()
         open_since = clock.get_time()
     else:
