@@ -83,7 +83,7 @@ class Redis:
             if e.errno == errno.ETIMEDOUT:
                 return None
             self.connect()
-        except Exception as e:
+        except Exception:
             self.connect()
 
         while True:
@@ -96,6 +96,7 @@ class Redis:
             except OSError as e:
                 if e.errno == errno.ETIMEDOUT:
                     return None
+                raise e
 
     def first_channel_message(self, channel):
         if self.subscription != channel:

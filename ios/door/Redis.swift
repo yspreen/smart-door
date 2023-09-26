@@ -133,7 +133,7 @@ enum RedisClient {
 		await startListener()
 	}
 
-	static func setLocked(to locked: Bool) async {
+	static func setLocked(to locked: Bool, tryReconnect: Bool = true) async {
 		let action = locked ? "lock" : "unlock"
 		var state = RedisStore.instance.doorState
 		state.locked = locked
@@ -150,8 +150,14 @@ enum RedisClient {
 			return
 		}
 		await set("door_\(doorId)", string)
-		_ = try? await redis?.publish(
-			action, to: "door_\(doorId)"
-		).get()
+		do {
+			_ = try await redis?.publish(
+				action, to: "door_\(doorId)"
+			).get()
+		} catch {
+			if !tryReconnect { return }
+			await connect()
+			await setLocked(to: locked, tryReconnect: false)
+		}
 	}
 }
