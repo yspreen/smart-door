@@ -33,16 +33,12 @@ class handler(BaseHTTPRequestHandler):
         params = parse_qs(parsed_url.query)
 
         key = params.get("key", [None])[0]
+        action = params.get("action", [None])[0]
 
         if key == SECRET:
-            self.handle_secret_key()
+            send_locked(action == "lock")
 
         self.send_response(302)  # Redirect
         self.send_header("Location", self.path)  # Redirect  which is handled by do_GET
         self.send_cors()
         self.end_headers()
-
-    def handle_secret_key(self):
-        from .redis import send_locked
-
-        send_locked(False)
