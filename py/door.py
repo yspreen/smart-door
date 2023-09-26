@@ -6,8 +6,12 @@ from redis import send_locked
 pwm = PWM(Pin(28))
 pwm.freq(50)
 
-locked_angle = 1000
-unlocked_angle = 5000
+
+## measured
+# 315 - 257 = 58
+
+unlocked_angle = 1000 + 8000 * 0 / 180  # 0deg
+locked_angle = 1000 + 8000 * 60 / 180  # 60deg
 relay_delay_s = 0.1
 servo_delay_s = 3.0
 
@@ -18,7 +22,7 @@ def set_relay_on(v):
 
 
 def move_servo_to(angle):
-    pwm.duty_u16(angle)
+    pwm.duty_u16(int(angle))
     sleep(0.01)
 
 
