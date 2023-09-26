@@ -33,10 +33,7 @@ def connect():
     print(wlan.ifconfig()[0])
 
 
-try:
-    connect()
-except KeyboardInterrupt:
-    machine.reset()
+connect()
 
 
 door_should_open = False
@@ -123,5 +120,15 @@ try:
     core0_thread()
 except Exception:
     pass
-sleep(3)
+sleep(1)
+try:
+    core0_thread()
+except Exception:
+    pass
+sleep(1)
+try:
+    core0_thread()
+except Exception:
+    pass
+sleep(1)
 machine.reset()
