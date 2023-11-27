@@ -30,7 +30,7 @@ enum RedisClient {
 
 	static let host = "***REMOVED***"
 	static let port = ***REMOVED***
-	static let username = "admin"
+	static let username = "***REMOVED***"
 	static let password = "***REMOVED***"
 	static var redis: RedisConnection?
 	static var redisListener: RedisConnection?
