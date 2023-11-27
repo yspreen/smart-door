@@ -1,6 +1,8 @@
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlparse
 
+from .redis import send_locked
+
 SECRET = "***REMOVED***"
 
 

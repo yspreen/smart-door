@@ -39,3 +39,10 @@ class HingeManager:
             reset_timer = True
 
         return door_is, door_should_be, reset_timer
+
+def hinge_example():
+    door_is_open = door_should_open = hinge_open = False
+    
+    door_is_open, door_should_open, reset_timer = hinge_manager.tick(
+        door_is_open, door_should_open, hinge_open
+    )

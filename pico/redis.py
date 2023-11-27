@@ -126,7 +126,7 @@ door = "***REMOVED***"
 
 host = "***REMOVED***"
 port = ***REMOVED***
-username = "admin"
+username = "***REMOVED***"
 password = "***REMOVED***"
 
 # print(f"redis://{username}:{password}@{host}:{port}")

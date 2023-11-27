@@ -1,18 +1,15 @@
 import machine
 import network
 
-from time import sleep
-
+from time import sleep_us
 from clock import clock
 from secret import ssid, password
 from redis import ping as redis_ping
 from hinge_manager import HingeManager
-
-
 from door import lock_door, unlock_door
-
 from machine import Pin
-
+from dist import is_closer
+from config_manager import config_manager
 
 # Connect to WLAN
 wlan = network.WLAN(network.STA_IF)
@@ -20,7 +17,6 @@ wlan = network.WLAN(network.STA_IF)
 AUTO_LOCK_AFTER = 20  # seconds
 
 pin_hinge = Pin(14, mode=Pin.IN, pull=Pin.PULL_UP)
-pin_handle = Pin(15, mode=Pin.IN, pull=Pin.PULL_UP)
 
 
 hinge_manager = 0
@@ -41,20 +37,20 @@ def reset_vars():
 
 
 def connect():
-    sleep(1)
+    sleep_us(1_000_000)
     wlan.active(True)
-    sleep(1)
+    sleep_us(1_000_000)
     wlan.connect(ssid, password)
     fails = 0
     while wlan.isconnected() == False:
         fails += 1
         if fails > 15:
-            sleep(1)
+            sleep_us(1_000_000)
             wlan.active(False)
-            sleep(1)
+            sleep_us(1_000_000)
             return connect()
         print("Waiting for connection...")
-        sleep(1)
+        sleep_us(1_000_000)
     print(wlan.ifconfig()[0])
 
 
@@ -66,7 +62,7 @@ def core0_thread():
     reset_vars()
 
     while True:
-        sleep(0.01)
+        sleep_us(10_000)
         msg = ""
         try:
             msg = next_door_message()
@@ -80,6 +76,8 @@ def core0_thread():
             door_should_open = False
         if msg == "unlock":
             door_should_open = True
+        if msg and msg.lower().startswith("set distance="):
+            config_manager.set("distance", int(msg.split('=')[1].strip()))
 
         gpio_loop_iter()
         ping()
@@ -93,7 +91,7 @@ def ping():
     for _ in range(3):  # 3 tries
         if redis_ping() == "pong":
             return
-        sleep(1)
+        sleep_us(1_000_000)
     raise ValueError("disconnected")
 
 
@@ -101,7 +99,9 @@ def gpio_loop_iter():
     global door_should_open, door_is_open, open_since
 
     hinge_open = pin_hinge.value()
-    handle_pressed = not pin_handle.value()
+    closer = is_closer(config_manager.get("distance", 100))
+    #print(closer)
+    handle_pressed = closer
 
     if door_is_open and clock.get_time() > open_since + AUTO_LOCK_AFTER:
         door_should_open = False
@@ -127,12 +127,13 @@ def gpio_loop_iter():
 
 
 connect()
-
+#core0_thread()
 for _ in range(3):
     try:
         core0_thread()
-    except Exception:
+    except Exception as e:
+        print(e)
         pass
-    sleep(1)
+    sleep_us(1_000_000)
 
 machine.reset()
