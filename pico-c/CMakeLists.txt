@@ -40,7 +40,7 @@ target_include_directories(PicoTest PRIVATE
     "src"
 )
 
-target_link_libraries(PicoTest pico_cyw43_arch_lwip_threadsafe_background pico_stdlib hardware_flash hardware_pwm)
+target_link_libraries(PicoTest pico_cyw43_arch_lwip_threadsafe_background pico_stdlib hardware_flash hardware_pwm hardware_i2c)
 
 # Enable USB, UART output
 pico_enable_stdio_usb(PicoTest 1)

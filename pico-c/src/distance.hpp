@@ -3,6 +3,8 @@
 
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
+#include "hardware/i2c.h"
+#include "VL53L0X.h"
 
 class Distance
 {
@@ -12,7 +14,7 @@ public:
 
 private:
     float measure_distance();
-    bool is_closer_single(int cm);
+    VL53L0X sensor;
 };
 
 #endif // DISTANCE_HPP

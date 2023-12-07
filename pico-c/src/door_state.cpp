@@ -13,7 +13,6 @@ DoorState::DoorState(ConfigManager *config)
     this->config = config;
     open_since = get_absolute_time();
     hinge = HingeManager();
-    distance = Distance();
     door = Door();
 
     gpio_init(PIN_HINGE);
